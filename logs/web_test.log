@@ -1,0 +1,22 @@
+Jan 28 08:00:01 server systemd: Started Session 1 of user root.
+Jan 28 08:05:22 server sshd[1234]: Failed password for invalid user admin from 192.168.1.100 port 44321 ssh2
+Jan 28 08:05:25 server sshd[1234]: Failed password for invalid user admin from 192.168.1.100 port 44321 ssh2
+Jan 28 08:05:28 server sshd[1234]: Failed password for invalid user admin from 192.168.1.100 port 44321 ssh2
+Jan 28 08:10:15 server sudo:    devran : TTY=pts/0 ; PWD=/home/devran ; USER=root ; COMMAND=/bin/bash
+Jan 28 08:10:15 server sudo: pam_unix(sudo:session): session opened for user root by devran(uid=1000)
+Jan 28 08:15:00 server kernel: [12345.678901] Out of memory: Kill process 9876 (stress) score 850 or sacrifice child
+Jan 28 08:15:00 server kernel: [12345.678902] Killed process 9876 (stress) total-vm:2048000kB, anon-rss:1500000kB, file-rss:0kB, shmem-rss:0kB
+Jan 28 08:20:00 server nginx: 10.0.0.5 - - [28/Jan/2024:08:20:00 +0300] "GET /admin.php HTTP/1.1" 404 150 "-" "Mozilla/5.0"
+Jan 28 08:20:01 server nginx: 10.0.0.5 - - [28/Jan/2024:08:20:01 +0300] "POST /login.php HTTP/1.1" 500 520 "-" "Mozilla/5.0"
+Jan 28 08:25:30 server sshd[2222]: Accepted password for root from 192.168.1.50 port 55667 ssh2
+Jan 28 08:25:30 server sshd[2222]: pam_unix(sshd:session): session opened for user root by (uid=0)
+Jan 28 08:30:45 server app[5555]: [ERROR] Connection to database timed out after 3000ms
+Jan 28 08:30:46 server app[5555]: [CRITICAL] Unhandled exception in main loop: NullPointerException
+Jan 28 08:35:10 server kernel: [13000.123456] segfault at 0 ip 00007f... sp 00007fff... error 4 in libc.so.6
+Jan 28 08:40:00 server sshd[3333]: authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=111.222.33.44  user=root
+Jan 28 08:40:02 server sshd[3333]: Failed password for root from 111.222.33.44 port 33445 ssh2
+Jan 28 09:00:00 server CRON[7777]: (root) CMD ( /usr/local/bin/backup.sh )
+Jan 28 09:00:05 server CRON[7777]: (CRON) info (No MTA installed, discarding output)
+Jan 28 09:15:00 server nginx: 192.168.1.20 - - [28/Jan/2024:09:15:00 +0300] "GET / HTTP/1.1" 200 2340 "-" "Mozilla/5.0"
+Jan 28 09:15:01 server nginx: 192.168.1.20 - - [28/Jan/2024:09:15:01 +0300] "GET /style.css HTTP/1.1" 200 1024 "-" "Mozilla/5.0"
+Jan 28 09:15:02 server nginx: 192.168.1.20 - - [28/Jan/2024:09:15:02 +0300] "GET /app.js HTTP/1.1" 200 4096 "-" "Mozilla/5.0"

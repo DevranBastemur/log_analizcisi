@@ -1,0 +1,35 @@
+rules:
+  - id: "AUTH-001"
+    description: "Tekrarlanan başarısız SSH giriş denemesi"
+    pattern: "failed password|authentication failure|auth failure"
+    level: "HIGH"
+
+  - id: "AUTH-002"
+    description: "Geçersiz kullanıcı adı ile giriş denemesi"
+    pattern: "invalid user|illegal user"
+    level: "HIGH"
+
+  - id: "AUTH-003"
+    description: "Root kullanıcısı ile başarılı giriş"
+    pattern: "accepted password for root|session opened for user root"
+    level: "CRITICAL"
+
+  - id: "SYS-001"
+    description: "Kritik sistem hatası (Kernel/Panic)"
+    pattern: "kernel: .*panic|segfault|out of memory"
+    level: "CRITICAL"
+
+  - id: "SYS-002"
+    description: "Genel hata veya uyarı"
+    pattern: "error|fail|failed|warning"
+    level: "MEDIUM"
+
+  - id: "SEC-001"
+    description: "Sudo yetki kullanımı"
+    pattern: "sudo:.*COMMAND="
+    level: "MEDIUM"
+
+  - id: "WEB-001"
+    description: "Web Sunucusu 5xx Hatası"
+    pattern: "HTTP/1\\.[01]\" 5\\d{2}"
+    level: "HIGH"

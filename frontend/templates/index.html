@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Analizcisi Projesi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #050505; color: #e0e0e0; }
+        .navbar { background-color: #000000 !important; border-bottom: 2px solid #8b0000; }
+        .navbar-brand { color: #ff0000 !important; font-weight: bold; text-shadow: 0 0 5px #8b0000; }
+        
+        .nav-tabs { border-bottom: 1px solid #8b0000; }
+        .nav-tabs .nav-link { color: #ff6666; background-color: #1a1a1a; border: 1px solid #333; margin-right: 2px; }
+        .nav-tabs .nav-link:hover { border-color: #8b0000; color: #ff0000; }
+        .nav-tabs .nav-link.active { background-color: #8b0000; color: #fff; border-color: #8b0000; }
+        
+        .tab-content { background-color: #111; border: 1px solid #8b0000; border-top: none; color: #ccc; }
+        .form-control { background-color: #222; border: 1px solid #444; color: #fff; }
+        .form-control:focus { background-color: #222; color: #fff; border-color: #ff0000; box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+        
+        .log-container {
+            background-color: #000000;
+            color: #ff3333;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 15px;
+            height: 400px;
+            overflow-y: scroll;
+            border-radius: 5px;
+            border: 1px solid #8b0000;
+            box-shadow: inset 0 0 10px #000;
+        }
+        .event-high { color: #ff4d4d; font-weight: bold; }
+        .event-medium { color: #ffcc00; }
+        .event-critical { background-color: #ff0000; color: white; padding: 2px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">🛡️ Log Analizcisi & Güvenlik Monitörü</a>
+    </div>
+</nav>
+
+<div class="container">
+    
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button">📂 Dosya Analizi</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="live-tab" data-bs-toggle="tab" data-bs-target="#live" type="button">📡 Canlı İzleme</button>
+        </li>
+    </ul>
+
+    <div class="tab-content p-4 rounded-bottom shadow-sm" id="myTabContent">
+        
+        <div class="tab-pane fade show active" id="upload" role="tabpanel">
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <input class="form-control" type="file" id="logFile">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-danger w-100" onclick="analyzeLog()">🔍 Analiz Et</button>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-danger w-100" onclick="downloadCSV()">📥 CSV İndir</button>
+                </div>
+            </div>
+
+            <div id="statsArea" class="alert alert-dark border-danger text-danger d-none"></div>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-bordered border-danger d-none" id="resultTable">
+                    <thead>
+                        <tr>
+                            <th>Seviye</th>
+                            <th>Kural ID</th>
+                            <th>Açıklama</th>
+                            <th>Satır</th>
+                            <th>Log İçeriği</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="live" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5>Canlı Log Akışı (logs/web_test.log)</h5>
+                <button class="btn btn-danger btn-sm" onclick="stopStream()">Durdur</button>
+                <button class="btn btn-success btn-sm" onclick="startStream()">Başlat</button>
+            </div>
+            <div class="log-container" id="logStream">
+                <div>Sistem izlemeye hazır... Başlat butonuna basın.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let eventSource;
+
+    async function analyzeLog() {
+        const fileInput = document.getElementById('logFile');
+        if (!fileInput.files[0]) { alert("Lütfen bir dosya seçin!"); return; }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        const response = await fetch('/api/analyze', { method: 'POST', body: formData });
+        const data = await response.json();
+
+        const statsArea = document.getElementById('statsArea');
+        statsArea.classList.remove('d-none');
+        statsArea.innerHTML = `<strong>Sonuç:</strong> Toplam ${data.total_lines} satır tarandı. <strong>${data.events_detected}</strong> şüpheli olay tespit edildi.`;
+
+        const tbody = document.getElementById('resultBody');
+        tbody.innerHTML = "";
+        document.getElementById('resultTable').classList.remove('d-none');
+
+        data.events.forEach(event => {
+            let badgeClass = "bg-secondary";
+            if(event.level === "HIGH") badgeClass = "bg-warning text-dark";
+            if(event.level === "CRITICAL") badgeClass = "bg-danger";
+
+            const row = `<tr>
+                <td><span class="badge ${badgeClass}">${event.level}</span></td>
+                <td>${event.rule_id}</td>
+                <td>${event.description}</td>
+                <td>${event.line_number}</td>
+                <td class="text-break" style="font-family:monospace; font-size:0.9em;">${event.log}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    async function downloadCSV() {
+        const fileInput = document.getElementById('logFile');
+        if (!fileInput.files[0]) { alert("Lütfen önce bir dosya seçin!"); return; }
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        const response = await fetch('/api/export-csv', { method: 'POST', body: formData });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "log_analiz_raporu.csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            alert("CSV oluşturulurken hata oluştu.");
+        }
+    }
+
+    function startStream() {
+        if(eventSource) eventSource.close();
+        const logContainer = document.getElementById('logStream');
+        logContainer.innerHTML = "<div>Bağlantı kuruluyor...</div>";
+
+        eventSource = new EventSource('/api/stream');
+        eventSource.onmessage = function(e) {
+            const newElement = document.createElement("div");
+            newElement.textContent = "> " + e.data;
+            logContainer.appendChild(newElement);
+            logContainer.scrollTop = logContainer.scrollHeight; 
+        };
+    }
+
+    function stopStream() { if(eventSource) eventSource.close(); }
+</script>
+</body>
+</html>
