@@ -38,7 +38,13 @@ Tarayıcınızdan **http://localhost:5000** adresine gidin.
 ```bash
 docker run -it --rm log-analizcisi python backend/menu.py
 
-
+```
  Notlar
  Web arayüzündeki "Canlı İzleme" demosu, proje içindeki `logs/web_test.log` dosyasını simüle eder.
 Sistem loglarını (örn: `/var/log`) okumak için Docker'ı `-v /var/log:/var/log` parametresi ile çalıştırmanız gerekir.
+
+<img width="556" height="293" alt="image" src="https://github.com/user-attachments/assets/1769b3b0-4f4e-48f2-ad5e-3dabcda526cb" />
+
+<img width="877" height="775" alt="image" src="https://github.com/user-attachments/assets/f108a192-bfb3-4294-8f74-6ed499dc6914" />
+
+
